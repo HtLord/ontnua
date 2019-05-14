@@ -1,4 +1,4 @@
-module github.com/HtLord/serv/model
+module github.com/HtLord/ontnua/model
 
 go 1.12
 
