@@ -8,4 +8,5 @@ func Wrapper(obj *interface{}, c gin.Context) error {
 		return err
 	}
 	return nil
+
 }
