@@ -1,4 +1,4 @@
-package api
+package mongo
 
 import (
 	"context"
@@ -77,10 +77,10 @@ func GetColl(dbName string, collName string, opts ...*options.CollectionOptions)
 	}
 }
 
-func CloseDB() {
+func CloseDB() int{
 	if _Client == nil {
 		fmt.Printf("No connection to MongoDB.\n")
-		return
+		return 0
 	}
 
 	err := _Client.Disconnect(context.TODO())
@@ -88,4 +88,6 @@ func CloseDB() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Connection to MongoDB closed.\n")
+
+	return 1
 }
