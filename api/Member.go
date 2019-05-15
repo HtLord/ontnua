@@ -1,4 +1,4 @@
-package back
+package api
 
 import (
 	"context"
@@ -20,8 +20,7 @@ func CreateTest(ctx *gin.Context) {
 		ctx.Error(nil)
 		return
 	}
-	servmodel.
-	_, err := GetColl(dbName, collName).InsertOne(context.TODO(), keeper)
+	_, err := GetColl(dbName, collName).InsertOne(context.TODO(), model.Member{name,acct, secret, current, current})
 	if err != nil{
 		ctx.Error(nil)
 		return
