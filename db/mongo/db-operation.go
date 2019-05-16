@@ -14,7 +14,7 @@ var _Client *mongo.Client
 var _DBPool []*mongo.Database
 var _CollPool []*mongo.Collection
 
-func GetClient() *mongo.Client {
+func getClient() *mongo.Client {
 	if _Client == nil {
 		if _URI == "" {
 			panic("Can not found MONGO_SECRET in env_var.")
@@ -33,7 +33,7 @@ func GetClient() *mongo.Client {
 }
 
 func PingDB() {
-	err := GetClient().Ping(context.TODO(), nil)
+	err := getClient().Ping(context.TODO(), nil)
 
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +43,7 @@ func PingDB() {
 	CloseDB()
 }
 
-func GetDB(dbName string, opts ...*options.CollectionOptions) *mongo.Database {
+func getDB(dbName string, opts ...*options.CollectionOptions) *mongo.Database {
 	var db *mongo.Database
 	for _, v := range _DBPool {
 		if v.Name() == dbName {
@@ -54,7 +54,7 @@ func GetDB(dbName string, opts ...*options.CollectionOptions) *mongo.Database {
 	if db != nil {
 		return db
 	} else {
-		db = GetClient().Database(dbName)
+		db = getClient().Database(dbName)
 		_DBPool = append(_DBPool, db)
 		return db
 	}
@@ -71,13 +71,13 @@ func GetColl(dbName string, collName string, opts ...*options.CollectionOptions)
 	if coll != nil {
 		return coll
 	} else {
-		coll = GetClient().Database(dbName).Collection(collName)
+		coll = getDB(dbName, opts...).Collection(collName)
 		_CollPool = append(_CollPool, coll)
 		return coll
 	}
 }
 
-func CloseDB() int{
+func CloseDB() int {
 	if _Client == nil {
 		fmt.Printf("No connection to MongoDB.\n")
 		return 0
