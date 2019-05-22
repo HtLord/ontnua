@@ -33,6 +33,7 @@ func CreateMember(c *gin.Context) {
 	current := time.Now()
 	m.CreateTime = current
 	m.UpdateTime = current
+	m.Enable = true
 
 	_, err = coll.InsertOne(context.TODO(), m)
 	if err != nil {
