@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -44,10 +45,21 @@ func ReadMany(coll *mongo.Collection, filter interface{}) (*mongo.Cursor, error)
 	return cur, nil
 }
 
+/*
+Use it with UpdateFilter. You can reference it by TestUpdateFilter in coll-operation_test.go
+ */
 func UpdateOne(coll *mongo.Collection, filter interface{}, data interface{}) error {
 	_, err := coll.UpdateOne(context.TODO(), filter, data)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+/*
+When a request is be decode into json interface you can use this and assign as filter argument of UpdateOne without
+declare a new variable and assign to it.
+ */
+func UpdateFilter(filter interface{}) interface{}{
+	return bson.D{{"$set", filter}}
 }

@@ -53,3 +53,22 @@ func TestReadMany(t *testing.T) {
 		t.Log(o)
 	}
 }
+
+func TestUpdateOne(t *testing.T) {
+	f := bson.D{{"f1", "t1"}}
+	u := bson.D{{"$set", bson.D{{"f2", "t22"},}},}
+
+	err := UpdateOne(GetColl("test", "test"), f, u)
+	if err != nil{
+		t.Error(err)
+	}
+}
+
+func TestUpdateFilter(t *testing.T) {
+	f := bson.D{{"f1", "t1"}}
+	u := bson.D{{"f2", "t22"}}
+	err := UpdateOne(GetColl("test", "test"), f, UpdateFilter(u))
+	if err != nil{
+		t.Error(err)
+	}
+}
