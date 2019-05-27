@@ -23,11 +23,17 @@ type Member struct {
 // Filter match secret will has security problem. Some may trend to using readable secret
 // to find same results Name, Email.
 type MemberFilter struct {
-	Name       string    `json:"name" form:"name" xml:"name"`
-	Email      string    `json:"email" form:"email" xml:"email"`
-	Enable     bool      `json:"enable" form:"enable" xml:"enable"`
-	CreateTime time.Time `json:"createTime" form:"createTime" xml:"createTime"`
-	UpdateTime time.Time `json:"updateTime" form:"updateTime" xml:"updateTime"`
+	Name       string    `json:"name" uri:"name" form:"name" xml:"name"`
+	Email      string    `json:"email" uri:"email" form:"email" xml:"email"`
+	Enable     bool      `json:"enable" uri:"enable" form:"enable" xml:"enable"`
+	CreateTime time.Time `json:"createTime" uri:"createTime" form:"createTime" xml:"createTime"`
+	UpdateTime time.Time `json:"updateTime" uri:"updateTime" form:"updateTime" xml:"updateTime"`
+}
+
+type MemberDelete struct {
+	Name       string    `json:"name" form:"name" xml:"name" binding:"required"`
+	Email      string    `json:"email" form:"email" xml:"email" binding:"required"`
+	Secret     string    `json:"secret" form:"secret" xml:"secret" binding:"required"`
 }
 
 type ADM struct {

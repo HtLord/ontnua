@@ -13,20 +13,18 @@ import (
 var coll = mongo.GetColl(MemberDocNameMap.DbName, MemberDocNameMap.CollName)
 
 func MemberRouting(r *gin.Engine) {
-	r.POST("/create/member", CreateMember)
-	r.GET("/update/member/:mail/:phoneNumber", CreateMember)
-	r.POST("/update/member", CreateMember)
-	r.GET("/read/member/:mail/:phoneNumber", ReadMember)
+	r.PUT("/create/member", CreateMember)
+	r.POST("/update/member", UpdateMember)
+	r.GET("/read/member/:name", ReadMember)
+	r.DELETE("/delete/member/:mail/:phoneNumber/:secret", DeleteMember)
 }
 
 func CreateMember(c *gin.Context) {
 
-	resData := NewJRes()
-
 	m := model.Member{}
 	err := c.ShouldBind(&m)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, RejectRes(err))
 		return
 	}
 
@@ -35,75 +33,87 @@ func CreateMember(c *gin.Context) {
 	m.UpdateTime = current
 	m.Enable = true
 
-	_, err = coll.InsertOne(context.TODO(), m)
+	err = mongo.CreateOne(coll, &m)
 	if err != nil {
-		resData["API-Call"] = "reject"
-		resData["Reject-Reson"] = err
-		c.JSON(http.StatusBadRequest, resData)
+		c.JSON(http.StatusExpectationFailed, RejectRes(err))
+		return
 	}
 
-	c.JSON(http.StatusOK, resData)
+	c.JSON(http.StatusOK, AcceptRes())
 }
 
 func UpdateMember(c *gin.Context) {
 
-	m := model.Member{}
-	err := c.ShouldBind(&m)
+	filter := model.MemberFilter{}
+	err := c.ShouldBind(&filter)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, RejectRes(err))
+		return
+	}
+
+	m := model.Member{}
+	err = c.ShouldBind(&m)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, RejectRes(err))
 		return
 	}
 
 	current := time.Now()
-	m.CreateTime = current
 	m.UpdateTime = current
 
-	_, err = coll.InsertOne(context.TODO(), m)
+	_, err = coll.UpdateOne(context.TODO(), mongo.UpdateFilter(filter), m)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusExpectationFailed, RejectRes(err))
 		return
 	}
+
+	c.JSON(http.StatusOK, AcceptRes())
 }
 
 func ReadMember(c *gin.Context) {
 
 	m := model.Member{}
-	filter := model.MemberFilter{}
+	filter := make(map[string]string)
+	for _, v := range c.Params {
+		filter[v.Key] = v.Value
+	}
 
-	err := c.ShouldBind(&filter)
+	fmt.Println(filter)
+
+	err := mongo.ReadOne(coll, filter, &m)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, RejectResWith("ReadMember using coll-operation ReadOne", err))
 		return
 	}
 
-	cur, err := coll.Find(context.TODO(), filter)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	err = cur.Decode(m)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, m)
-	}
+	c.JSON(http.StatusOK, m)
 }
 
 func DeleteMember(c *gin.Context) {
 
-	m := model.Member{}
-	err := c.ShouldBind(&m)
+	filter := model.MemberDelete{}
+	err := c.ShouldBind(&filter)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, RejectRes(err))
+		return
+	}
+
+	m := model.Member{}
+	err = c.ShouldBind(&m)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, RejectRes(err))
 		return
 	}
 
 	current := time.Now()
-	m.CreateTime = current
 	m.UpdateTime = current
+	m.Enable = false
 
-	_, err = coll.InsertOne(context.TODO(), m)
+	_, err = coll.UpdateOne(context.TODO(), mongo.UpdateFilter(filter), m)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusExpectationFailed, RejectRes(err))
 		return
 	}
+
+	c.JSON(http.StatusOK, AcceptRes())
 }
